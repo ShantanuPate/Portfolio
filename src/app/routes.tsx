@@ -25,8 +25,14 @@ function RootLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-stone-950 focus:px-4 focus:py-3 focus:font-mono focus:text-xs focus:uppercase focus:tracking-widest focus:text-white"
+      >
+        Skip to content
+      </a>
       <Navbar />
-      <main className="flex-1 flex flex-col">
+      <main id="main" tabIndex={-1} className="flex-1 flex flex-col outline-none">
         <Outlet />
       </main>
       <Footer />

@@ -1,554 +1,440 @@
+import { useCallback, useState } from "react";
 import { motion } from "motion/react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "react-router";
-import { ArrowRight, Target, ClipboardList, Users, Network, Lightbulb } from "lucide-react";
-import { useRef, useEffect, useState } from "react";
-import { caseStudies, skills, processSteps } from "../data/content";
-import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
-import heroIllustration from "../imports/image-2.png";
+import { Button } from "../app/components/ui/button";
+import { InsightHero } from "../components/InsightHero";
+import { EntryIntro, shouldPlayIntro } from "../components/EntryIntro";
 
-const iconMap: Record<string, React.ReactNode> = {
-  Target: <Target className="w-6 h-6" />,
-  ClipboardList: <ClipboardList className="w-6 h-6" />,
-  Users: <Users className="w-6 h-6" />,
-  Network: <Network className="w-6 h-6" />,
-  Lightbulb: <Lightbulb className="w-6 h-6" />
-};
+import unifiedServiceCover from "../imports/Slide_16_9_-_3.png";
+import ehrCover from "../imports/Vitals.png";
+import diabetesCover from "../imports/Ascensia.png";
+import foodCover from "../imports/Espresso_Nook.png";
+import clinicalArchive from "../imports/Frame233-1/71a3ff9bd66ad4def0a83459e5d758867443569d.png";
+import clinicalConversation from "../imports/Frame233-1/35cd4a6e9499a4286a8280f04619fd79ceca9bde.png";
+import hospitalContext from "../imports/ContainerMargin/21fc9f9c07531f4765b65c7b97cda6ef8b4c51ef.png";
+import interfaceExploration from "../imports/Slide1691/ab97a98852d52bf6595a903a10e1f4ac7c58fb72.png";
+import mobileFlow from "../imports/Slide1691/b5cb3111e12d0ac26603d6c3d7fdb77c680f4d1d.png";
+import systemStates from "../imports/Slide1691/46e3c349954f418fd1bac41ba0f00eea1236952f.png";
 
-function ScaledThumbnail({ children, naturalWidth = 1920, naturalHeight = 1080 }: { children: React.ReactNode; naturalWidth?: number; naturalHeight?: number }) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0);
+const expertise = [
+  {
+    number: "01",
+    title: "Healthcare",
+    copy: "Designing tools, workflows, and experiences that support healthcare professionals and patients.",
+  },
+  {
+    number: "02",
+    title: "Financial Services",
+    copy: "Exploring trust, compliance, and digitization across customer and operational journeys.",
+  },
+  {
+    number: "03",
+    title: "Enterprise Operations",
+    copy: "Simplifying fragmented systems, operational workflows, and service experiences.",
+  },
+];
 
-  useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(entries => {
-      const width = entries[0].contentRect.width;
-      setScale(width / naturalWidth);
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [naturalWidth]);
+const beliefs = [
+  "Observe behaviour before collecting opinions.",
+  "Map workflows before designing screens.",
+  "Evidence over assumptions.",
+  "Design for systems, not isolated interactions.",
+];
 
+const explorations = [
+  "Enterprise AI Copilots",
+  "Healthcare Workflow Simplification",
+  "Digital Transformation in Financial Services",
+  "Conversational Analytics",
+  "Future of Research Operations",
+];
+
+const evidence = [
+  ["60+", "Stakeholder interviews"],
+  ["12+", "Workshops facilitated"],
+  ["20+", "Journey maps"],
+  ["4", "Industries explored"],
+];
+
+function SectionLabel({ index, children, light }: { index: string; children: React.ReactNode; light?: boolean }) {
   return (
-    <div ref={wrapperRef} className="w-full overflow-hidden bg-stone-200 relative" style={{ aspectRatio: `${naturalWidth} / ${naturalHeight}` }}>
-      {scale > 0 && (
-        <div
-          className="absolute top-0 left-0 overflow-hidden"
-          style={{ width: naturalWidth, height: naturalHeight, transform: `scale(${scale})`, transformOrigin: "top left" }}
-        >
-          {children}
-        </div>
-      )}
+    <div className={`flex items-center gap-4 font-mono text-xs uppercase tracking-widest ${light ? "text-stone-300" : "text-stone-600"}`}>
+      <span className={light ? "text-emerald-400" : "text-emerald-800"}>{index}</span>
+      <span>{children}</span>
     </div>
   );
 }
 
-
+function Artifact({
+  src,
+  alt,
+  label,
+  className,
+  imageClassName = "",
+}: {
+  src: string;
+  alt: string;
+  label: string;
+  className: string;
+  imageClassName?: string;
+}) {
+  return (
+    <figure className={`group bg-white p-2 shadow-xl shadow-stone-900/10 ${className}`}>
+      <div className="overflow-hidden bg-stone-200">
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          className={`h-full w-full object-cover transition duration-700 group-hover:scale-105 ${imageClassName}`}
+        />
+      </div>
+      <figcaption className="flex items-center justify-between gap-3 px-1 pb-1 pt-3 font-mono text-xs uppercase tracking-wider text-stone-600">
+        <span>{label}</span>
+        <span className="text-emerald-800">Archive</span>
+      </figcaption>
+    </figure>
+  );
+}
 
 export function Home() {
+  const [playIntro] = useState(shouldPlayIntro);
+  const [introDone, setIntroDone] = useState(!playIntro);
+  const [revealed, setRevealed] = useState(!playIntro);
+  const reveal = useCallback(() => setRevealed(true), []);
+  const finish = useCallback(() => setIntroDone(true), []);
   return (
-    <div className="bg-stone-50 min-h-screen pt-20">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-stone-200">
-        {/* Background texture */}
-        <div className="absolute inset-0 bg-[#faf6ef]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_60%_-10%,rgba(194,120,80,0.12),transparent)]" />
+    <div className="min-h-screen bg-stone-100 pt-20 text-stone-950">
+      {!introDone && <EntryIntro onReveal={reveal} onDone={finish} />}
+      <InsightHero play={revealed} />
 
-        <div className="relative max-w-6xl mx-auto px-6 pt-28 pb-0">
-          <div className="grid lg:grid-cols-[1fr_420px] gap-12 items-end">
-
-            {/* Left */}
-            <div className="pb-16">
-              {/* Status pill */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 bg-white border border-stone-200 rounded-full px-4 py-2 mb-8 shadow-sm"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="text-xs font-medium text-stone-600">Currently at Designit · Open to conversations</span>
-              </motion.div>
-
-              {/* Headline */}
-              <motion.h1
+      <section className="border-b border-stone-300 px-6 py-24 sm:px-10 lg:px-14">
+        <div className="mx-auto max-w-7xl">
+          <SectionLabel index="02">What I work on</SectionLabel>
+          <div className="mt-12 grid border-t border-stone-400 lg:grid-cols-3">
+            {expertise.map((item, index) => (
+              <motion.article
+                key={item.title}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-5xl md:text-6xl lg:text-[72px] font-bold tracking-tight text-stone-900 leading-[1.05] mb-6"
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: index * 0.08 }}
+                className="border-b border-stone-400 py-10 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0"
               >
-                Shantanu Pate —<br />
-                <span className="text-stone-400">Product Designer</span><br />
-                <span className="text-stone-400">&amp; UX Researcher.</span>
-              </motion.h1>
-
-              {/* Sub */}
-              <motion.p
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg text-stone-500 leading-relaxed max-w-lg mb-10"
-              >
-                I turn messy human problems into clear, evidence-backed design decisions — from field research and stakeholder workshops to interaction design and shipped products.
-              </motion.p>
-
-              {/* CTAs */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex flex-wrap items-center gap-3 mb-16"
-              >
-                <button
-                  onClick={() => document.getElementById("work")?.scrollIntoView({ behavior: "smooth" })}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-stone-900 text-white text-sm font-semibold rounded-full hover:bg-orange-700 transition-colors"
-                >
-                  View Case Studies <ArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-                  className="px-6 py-3 bg-white border border-stone-200 text-stone-700 text-sm font-semibold rounded-full hover:border-stone-400 transition-colors shadow-sm"
-                >
-                  Get in Touch
-                </button>
-              </motion.div>
-
-              {/* Stats row */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.45 }}
-                className="flex flex-wrap gap-x-10 gap-y-4 border-t border-stone-200 pt-8"
-              >
-                {[
-                  { value: "2+", label: "Years of experience" },
-                  { value: "10+", label: "Projects delivered" },
-                  { value: "~200", label: "Pain points synthesized" },
-                  { value: "3", label: "Industries researched" },
-                ].map(s => (
-                  <div key={s.label}>
-                    <p className="text-2xl font-bold text-stone-900">{s.value}</p>
-                    <p className="text-xs text-stone-400 mt-0.5">{s.label}</p>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* Right — illustration card */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative self-center pb-16"
-            >
-              {/* Glow */}
-              <div className="absolute inset-0 bg-orange-200/30 rounded-[2rem] blur-[50px] -z-10 scale-90" />
-
-              <div className="relative rounded-[2rem] overflow-hidden border border-stone-200 bg-stone-100 shadow-lg" style={{ aspectRatio: "3/4", width: "100%" }}>
-                <img
-                  src={heroIllustration}
-                  alt="Shantanu"
-                  className="w-full h-full object-cover object-top"
-                />
-
-                {/* Bottom info strip */}
-                <div className="absolute bottom-0 inset-x-0 bg-white/80 backdrop-blur-md border-t border-stone-200/60 px-5 py-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] text-stone-400 uppercase tracking-wider mb-0.5">Based in</p>
-                    <p className="text-sm font-bold text-stone-900">India 🇮🇳</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-stone-400 uppercase tracking-wider mb-1">Specialises in</p>
-                    <div className="flex gap-1 justify-end">
-                      {["UX Research", "Product Design"].map(t => (
-                        <span key={t} className="text-[10px] font-semibold text-stone-700 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded-full">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
+                <span className="font-mono text-xs text-emerald-800">{item.number}</span>
+                <p role="heading" aria-level={2} className="mt-14 font-serif text-4xl">
+                  {item.title}
+                </p>
+                <p className="mt-5 max-w-sm leading-relaxed text-stone-600">{item.copy}</p>
+              </motion.article>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Selected Work Section */}
-      <section id="work" className="py-24 bg-[#faf6ef] border-t border-stone-200">
-        <div className="max-w-6xl mx-auto px-6">
-
-          {/* Section header */}
-          <div className="mb-20">
-            <span className="font-['JetBrains_Mono',sans-serif] text-xs text-orange-700 tracking-[2px] uppercase block mb-3">Portfolio</span>
-            <h2 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-none">Selected Work</h2>
-          </div>
-
-          {/* ── Personal Case Studies ── */}
-          <div className="mb-20">
-            <div className="flex items-center gap-4 mb-8">
-              <p className="text-sm font-semibold text-stone-700 uppercase tracking-widest">Personal</p>
-              <div className="flex-1 h-px bg-stone-200" />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              {caseStudies.slice(0, 2).map((study, index) => (
-                <motion.div
-                  key={study.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Link
-                    to={`/case-study/${study.id}`}
-                    className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-stone-200 hover:border-stone-300 hover:shadow-xl hover:shadow-stone-900/6 transition-all duration-400 h-full"
-                  >
-                    {/* Thumbnail */}
-                    <div className="overflow-hidden bg-stone-100 shrink-0">
-                      <div className="group-hover:scale-[1.03] transition-transform duration-700 ease-out">
-                        <ScaledThumbnail
-                          naturalWidth={(study as any).thumbnailWidth}
-                          naturalHeight={(study as any).thumbnailHeight}
-                        >
-                          {study.thumbnail}
-                        </ScaledThumbnail>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex flex-col flex-1 p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full tracking-wide">
-                          {(study as any).tags?.split(" · ")[0] || study.metadata?.sector}
-                        </span>
-                        <span className="font-['JetBrains_Mono',sans-serif] text-[11px] text-stone-400">{(study as any).year || "2024"}</span>
-                      </div>
-                      <h3 className="text-lg font-bold text-stone-900 mb-2 leading-snug group-hover:text-orange-700 transition-colors duration-300">
-                        {study.title}
-                      </h3>
-                      <p className="text-stone-500 text-sm leading-relaxed line-clamp-2 mb-5 flex-1">
-                        {(study as any).subtitle || study.problem}
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-stone-100">
-                        <span className="text-xs text-stone-400">{(study as any).roleLabel || study.metadata?.role}</span>
-                        <div className="flex items-center gap-1.5 text-stone-400 group-hover:text-orange-700 transition-colors duration-300">
-                          <span className="text-xs font-medium">View</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-300" />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Designit Case Studies ── */}
-          <div>
-            <div className="flex items-center gap-4 mb-3">
-              <p className="text-sm font-semibold text-stone-700 uppercase tracking-widest">Designit</p>
-              <div className="flex-1 h-px bg-stone-200" />
-            </div>
-            <p className="text-stone-400 text-sm mb-8 flex items-center gap-2">
-              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-              </svg>
-              These case studies were completed during my time at Designit, a Wipro company. Final designs and deliverables are under NDA.
+      <section id="featured-work" className="bg-stone-950 px-6 py-24 text-stone-100 sm:px-10 lg:px-14">
+        <div className="mx-auto max-w-7xl">
+          <SectionLabel light index="03">Featured work</SectionLabel>
+          <div className="mb-20 mt-8 grid gap-8 lg:grid-cols-2 lg:items-end">
+            <p role="heading" aria-level={2} className="max-w-3xl font-serif text-6xl leading-none sm:text-7xl">
+              Stories from the field, not just finished screens.
             </p>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              {caseStudies.slice(2, 4).map((study, index) => (
-                <motion.div
-                  key={study.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Link
-                    to={`/case-study/${study.id}`}
-                    className="group flex flex-col rounded-2xl overflow-hidden bg-[#1a1814] border border-stone-700 hover:border-stone-500 hover:shadow-xl hover:shadow-black/20 transition-all duration-400 h-full"
-                  >
-                    {/* Thumbnail */}
-                    <div className="overflow-hidden bg-stone-800 shrink-0">
-                      <div className="group-hover:scale-[1.03] transition-transform duration-700 ease-out">
-                        <ScaledThumbnail
-                          naturalWidth={(study as any).thumbnailWidth}
-                          naturalHeight={(study as any).thumbnailHeight}
-                        >
-                          {study.thumbnail}
-                        </ScaledThumbnail>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex flex-col flex-1 p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-semibold text-stone-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full tracking-wide">
-                          {(study as any).tags?.split(" · ")[0] || study.metadata?.sector}
-                        </span>
-                        <div className="flex items-center gap-1.5 text-stone-500 text-[10px]">
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                          </svg>
-                          NDA · {(study as any).year || "2024"}
-                        </div>
-                      </div>
-                      <h3 className="text-lg font-bold text-white mb-2 leading-snug group-hover:text-orange-400 transition-colors duration-300">
-                        {study.title}
-                      </h3>
-                      <p className="text-stone-400 text-sm leading-relaxed line-clamp-2 mb-5 flex-1">
-                        {(study as any).subtitle || study.problem}
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                        <span className="text-xs text-stone-500">{(study as any).roleLabel || study.metadata?.role}</span>
-                        <div className="flex items-center gap-1.5 text-stone-500 group-hover:text-orange-400 transition-colors duration-300">
-                          <span className="text-xs font-medium">View</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-300" />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+            <p className="max-w-md text-lg leading-relaxed text-stone-400 lg:justify-self-end">
+              Selected work across complex operational systems and healthcare—showing the evidence, decisions,
+              and design outcomes together.
+            </p>
           </div>
 
-          {/* View all */}
-          <div className="flex justify-center mt-14">
+          <article className="border-t border-stone-700 py-16">
+            <div className="grid gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-4">
+                <span className="font-mono text-xs uppercase tracking-widest text-emerald-400">Flagship / 01</span>
+                <p role="heading" aria-level={3} className="mt-6 font-serif text-5xl leading-none">
+                  Unified Service Operations Platform
+                </p>
+                <p className="mt-7 leading-relaxed text-stone-400">
+                  Studied operational workflows across teams to uncover inefficiencies, coordination gaps, and
+                  opportunities for simplification.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-2 font-mono text-xs uppercase text-stone-400">
+                  <span>UX Research</span><span>/</span><span>Service Design</span><span>/</span><span>Enterprise</span>
+                </div>
+                <Button asChild variant="link" className="mt-8 h-auto p-0 text-emerald-400">
+                  <Link to="/case-study/unified-service-operations">
+                    Read the case study <ArrowRight />
+                  </Link>
+                </Button>
+              </div>
+              <Link
+                to="/case-study/unified-service-operations"
+                className="group overflow-hidden bg-stone-800 lg:col-span-8"
+              >
+                <img
+                  src={unifiedServiceCover}
+                  alt="Workshop setting for the Unified Service Operations Platform research"
+                  className="aspect-video h-full w-full object-cover grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0"
+                />
+              </Link>
+            </div>
+          </article>
+
+          <article className="border-t border-stone-700 py-16">
+            <div className="grid gap-10 lg:grid-cols-12">
+              <Link
+                to="/case-study/ehr-healthcare-system"
+                className="group overflow-hidden bg-emerald-950 lg:col-span-8"
+              >
+                <img
+                  src={ehrCover}
+                  alt="Cover of the Vitals electronic health record case study"
+                  className="aspect-video h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                />
+              </Link>
+              <div className="lg:col-span-4 lg:pl-6">
+                <span className="font-mono text-xs uppercase tracking-widest text-emerald-400">Flagship / 02</span>
+                <p role="heading" aria-level={3} className="mt-6 font-serif text-5xl leading-none">
+                  EHR Healthcare System
+                </p>
+                <p className="mt-7 leading-relaxed text-stone-400">
+                  Redesigned healthcare workflows around the needs of clinical professionals.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-2 font-mono text-xs uppercase text-stone-400">
+                  <span>Product Design</span><span>/</span><span>Healthcare</span><span>/</span><span>Systems Thinking</span>
+                </div>
+                <Button asChild variant="link" className="mt-8 h-auto p-0 text-emerald-400">
+                  <Link to="/case-study/ehr-healthcare-system">
+                    Read the case study <ArrowRight />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </article>
+
+          <div className="grid border-t border-stone-700 md:grid-cols-2">
+            {[
+              {
+                number: "03",
+                title: "Diabetes Care App Redesign",
+                image: diabetesCover,
+                href: "/case-study/ascensia-diabetes-care",
+                tags: "Healthcare / Product Design",
+              },
+              {
+                number: "04",
+                title: "Food & Beverage Experience",
+                image: foodCover,
+                href: "/case-study/food-beverage-app",
+                tags: "Consumer / Product Design",
+              },
+            ].map((project, index) => (
+              <article
+                key={project.title}
+                className="border-b border-stone-700 py-12 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
+              >
+                <Link to={project.href} className="group block">
+                  <div className="overflow-hidden bg-stone-800">
+                    <img
+                      src={project.image}
+                      alt={`${project.title} project cover`}
+                      className="aspect-video w-full object-cover transition duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="mt-6 flex items-start justify-between gap-6">
+                    <div>
+                      <span className="font-mono text-xs text-emerald-400">{project.number}</span>
+                      <p role="heading" aria-level={3} className="mt-2 font-serif text-3xl">
+                        {project.title}
+                      </p>
+                      <p className="mt-2 font-mono text-xs uppercase tracking-wider text-stone-400">{project.tags}</p>
+                    </div>
+                    <ArrowRight className="mt-2 text-stone-400 transition group-hover:translate-x-1 group-hover:text-emerald-400" />
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-6 border-t border-stone-700 pt-10">
+            <p className="font-mono text-xs uppercase tracking-widest text-stone-400">
+              More projects, with the research behind them
+            </p>
             <Link
               to="/work"
-              className="inline-flex items-center gap-2 px-7 py-3 bg-white border border-stone-200 text-stone-700 text-sm font-semibold rounded-full hover:border-stone-400 hover:text-orange-700 transition-all duration-300 shadow-sm"
+              className="group inline-flex items-center gap-3 border border-stone-500 px-7 py-4 font-mono text-xs uppercase tracking-widest text-stone-100 transition-colors hover:border-emerald-400 hover:text-emerald-400"
             >
-              View all work <ArrowRight className="w-4 h-4" />
+              View all work
+              <ArrowRight aria-hidden className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-28 border-t border-stone-200 bg-[#faf6ef]">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="overflow-hidden border-b border-stone-300 px-6 py-24 sm:px-10 lg:px-14">
+        <div className="mx-auto max-w-7xl">
+          {(() => {
+            const { ResearchWall } = Object.values(
+              import.meta.glob<{ ResearchWall: React.ComponentType }>("../components/ResearchWall.tsx", { eager: true }),
+            )[0];
+            return <ResearchWall />;
+          })()}
+        </div>
+      </section>
 
-          {/* Label */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mb-16"
-          >
-            <span className="font-['JetBrains_Mono',sans-serif] text-xs text-orange-700 tracking-[2px] uppercase block mb-4">About</span>
-            <h2 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-[1.08] max-w-2xl">
-              Designing with evidence, not assumptions.
-            </h2>
-          </motion.div>
-
-          {/* Top row — bio + currently block */}
-          <div className="grid md:grid-cols-[1fr_360px] gap-6 mb-6">
-
-            {/* Bio card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.05 }}
-              className="bg-white border border-stone-200 rounded-3xl p-10 flex flex-col justify-between"
-            >
-              <div className="space-y-4 text-[17px] text-stone-600 leading-relaxed mb-10">
-                <p>
-                  I'm a Product Designer and UX Researcher currently at <span className="font-semibold text-stone-900">Designit, a Wipro company</span>. I work at the intersection of deep user empathy, rigorous research, and considered design — turning messy human problems into decisions that hold up under scrutiny.
-                </p>
-                <p>
-                  I've worked across healthcare, enterprise software, consumer products, and banking — conducting field research, running stakeholder workshops, and shipping end-to-end design. My work doesn't stop at a deliverable; it stops when the insight is <span className="italic">usable</span>.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {["UX Research", "Product Design", "UX Strategy", "Usability Testing", "Design Systems", "Concept Design"].map(tag => (
-                  <span key={tag} className="text-[13px] px-3 py-1.5 bg-stone-50 border border-stone-200 text-stone-600 rounded-full">{tag}</span>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Currently / snapshot card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.12 }}
-              className="bg-stone-900 border border-stone-800 rounded-3xl p-8 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2 mb-8">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-medium text-stone-400 tracking-wide">Currently</span>
-                </div>
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Role</p>
-                    <p className="text-white font-semibold text-[15px]">Product Designer & UX Researcher</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Company</p>
-                    <p className="text-white font-semibold text-[15px]">Designit · A Wipro Company</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Based in</p>
-                    <p className="text-white font-semibold text-[15px]">India 🇮🇳</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Experience</p>
-                    <p className="text-white font-semibold text-[15px]">2+ Years</p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8 pt-6 border-t border-white/10">
-                <p className="text-[12px] text-stone-400">Open to new conversations and opportunities.</p>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Bottom row — toolkit cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                label: "Qualitative",
-                color: "bg-[#ffeee6] border-[#f5c7a9]",
-                labelColor: "text-[#d1512d]",
-                items: skills.qualitative,
-                tagStyle: "bg-white border border-[#f5c7a9] text-stone-700",
-              },
-              {
-                label: "Quantitative",
-                color: "bg-white border-stone-200",
-                labelColor: "text-stone-500",
-                items: skills.quantitative,
-                tagStyle: "bg-stone-50 border border-stone-200 text-stone-600",
-              },
-              {
-                label: "Tools",
-                color: "bg-white border-stone-200",
-                labelColor: "text-stone-500",
-                items: skills.tools,
-                tagStyle: "bg-orange-50 border border-orange-100 text-orange-700",
-              },
-            ].map((col, i) => (
+      <section className="border-b border-stone-300 bg-emerald-800 px-6 py-20 text-white sm:px-10 lg:px-14">
+        <div className="mx-auto max-w-7xl">
+          <SectionLabel index="05"><span className="text-white">Research in practice</span></SectionLabel>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {evidence.map(([value, label], index) => (
               <motion.div
-                key={col.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={label}
+                initial={{ opacity: 0, rotate: index % 2 ? 2 : -2 }}
+                whileInView={{ opacity: 1, rotate: index % 2 ? 1 : -1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.05 * i }}
-                className={`${col.color} border rounded-3xl p-7`}
+                className="bg-stone-100 p-7 text-stone-950 shadow-lg"
               >
-                <p className={`font-['JetBrains_Mono',sans-serif] text-[10px] uppercase tracking-[1.5px] ${col.labelColor} mb-5`}>{col.label}</p>
-                <div className="flex flex-wrap gap-2">
-                  {col.items.map(item => (
-                    <span key={item} className={`text-[12px] px-3 py-1.5 rounded-full ${col.tagStyle}`}>{item}</span>
-                  ))}
-                </div>
+                <p className="font-serif text-6xl">{value}</p>
+                <p className="mt-8 font-mono text-xs uppercase tracking-wider text-stone-600">{label}</p>
               </motion.div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* How I Work Section */}
-      <section id="process" className="py-28 bg-stone-900 text-stone-50 border-t border-stone-800">
-        <div className="max-w-6xl mx-auto px-6">
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="grid md:grid-cols-[1fr_auto] items-end gap-6 mb-16"
-          >
-            <div>
-              <span className="font-['JetBrains_Mono',sans-serif] text-xs text-orange-500 tracking-[2px] uppercase block mb-4">Process</span>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.08] max-w-xl">
-                How I work.
-              </h2>
-            </div>
-            <p className="text-stone-400 text-[15px] leading-relaxed max-w-xs md:text-right">
-              A structured, iterative approach — designed to surface real insight before a single pixel is placed.
+      <section className="border-b border-stone-300 px-6 py-24 sm:px-10 lg:px-14">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-3">
+          <div>
+            <SectionLabel index="06">Now</SectionLabel>
+            <p role="heading" aria-level={2} className="mt-8 font-serif text-5xl">
+              Currently exploring
             </p>
-          </motion.div>
-
-          {/* Process steps — vertical list */}
-          <div className="space-y-3">
-            {[
-              {
-                id: "01",
-                title: "Problem Framing",
-                desc: "Align with stakeholders on business goals. Define core research questions. Agree on what success looks like before any work begins.",
-                tags: ["Stakeholder Alignment", "Brief Writing", "Scope Definition"],
-              },
-              {
-                id: "02",
-                title: "Research Planning",
-                desc: "Select methodologies that match the question — not the calendar. Recruit the right participants, write discussion guides, prepare observation frameworks.",
-                tags: ["Method Selection", "Participant Recruiting", "Discussion Guides"],
-              },
-              {
-                id: "03",
-                title: "Data Collection",
-                desc: "Run interviews, contextual inquiries, and shadowing sessions. Collect behavioral data alongside attitudinal self-report. Stay curious, not confirmatory.",
-                tags: ["User Interviews", "Contextual Inquiry", "Shadowing", "Surveys"],
-              },
-              {
-                id: "04",
-                title: "Synthesis",
-                desc: "Find patterns through affinity mapping and thematic analysis. Translate raw notes into insight clusters that the whole team can act on.",
-                tags: ["Affinity Mapping", "Thematic Analysis", "Journey Mapping"],
-              },
-              {
-                id: "05",
-                title: "Design & Validation",
-                desc: "Translate insights into concepts, flows, and high-fidelity interfaces. Test early and often. Iterate until the design earns its place through evidence.",
-                tags: ["Wireframing", "Hi-Fi Design", "Usability Testing", "Prototyping"],
-              },
-            ].map((step, index) => (
-              <motion.div
-                key={step.id}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: index * 0.07 }}
-                className="group bg-white/4 hover:bg-white/7 border border-white/8 hover:border-white/16 rounded-2xl px-7 py-6 grid md:grid-cols-[56px_1fr_auto] gap-6 items-center transition-all duration-300"
+            <p className="mt-6 max-w-sm leading-relaxed text-stone-600">
+              Questions in my notebook right now—unfinished, active, and likely to change.
+            </p>
+          </div>
+          <div className="border-t border-stone-400 lg:col-span-2">
+            {explorations.map((topic, index) => (
+              <div
+                key={topic}
+                className="group flex items-center justify-between gap-8 border-b border-stone-400 py-5"
               >
-                <span className="font-['JetBrains_Mono',sans-serif] text-[13px] text-orange-500 font-bold">{step.id}</span>
-                <div>
-                  <h3 className="text-[17px] font-bold text-white mb-1.5 group-hover:text-orange-300 transition-colors duration-300">{step.title}</h3>
-                  <p className="text-[13px] text-stone-400 leading-relaxed">{step.desc}</p>
-                </div>
-                <div className="hidden md:flex flex-wrap gap-1.5 justify-end max-w-[280px]">
-                  {step.tags.map(tag => (
-                    <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full bg-white/6 border border-white/10 text-stone-400">{tag}</span>
-                  ))}
-                </div>
-              </motion.div>
+                <span className="font-mono text-xs text-emerald-800">0{index + 1}</span>
+                <p className="flex-1 font-serif text-2xl transition group-hover:translate-x-2">{topic}</p>
+                <span className="text-stone-400">↗</span>
+              </div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-32 bg-stone-100">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight mb-6">Let's build something meaningful.</h2>
-          <p className="text-xl text-stone-500 mb-10">
-            Currently open for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
+      <section className="border-b border-stone-300 px-6 py-24 sm:px-10 lg:px-14">
+        <div className="mx-auto max-w-7xl">
+          <SectionLabel index="07">How I think</SectionLabel>
+          <div className="mt-12 grid gap-0 border-l border-t border-stone-400 md:grid-cols-2">
+            {beliefs.map((belief, index) => (
+              <div key={belief} className="min-h-64 border-b border-r border-stone-400 p-8 sm:p-10">
+                <span className="font-mono text-xs text-emerald-800">0{index + 1}</span>
+                <p role="heading" aria-level={3} className="mt-16 max-w-md font-serif text-4xl leading-tight">
+                  {belief}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-stone-300 bg-stone-200 px-6 py-24 sm:px-10 lg:px-14">
+        <div className="mx-auto max-w-7xl">
+          <SectionLabel index="08">Cross-industry notes</SectionLabel>
+          <p role="heading" aria-level={2} className="mt-8 max-w-3xl font-serif text-5xl sm:text-6xl">
+            What different industries taught me
           </p>
-          <a
-            href="mailto:hello@example.com"
-            className="inline-flex items-center justify-center px-8 py-4 bg-orange-700 text-white text-lg font-medium rounded-full hover:bg-orange-800 transition-colors shadow-lg shadow-orange-700/20"
-          >
-            Say Hello
-          </a>
+          <div className="mt-16 grid border-t border-stone-500 lg:grid-cols-3">
+            {[
+              ["Healthcare", "Accuracy matters more than speed."],
+              ["Financial Services", "Trust matters more than convenience."],
+              ["Enterprise Systems", "Visibility matters more than simplicity."],
+            ].map(([industry, lesson]) => (
+              <div key={industry} className="border-b border-stone-500 py-10 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0">
+                <p className="font-mono text-xs uppercase tracking-wider text-emerald-800">{industry}</p>
+                <p className="mt-14 font-serif text-4xl leading-tight">{lesson}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-stone-300 px-6 py-24 sm:px-10 lg:px-14">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <SectionLabel index="09">About</SectionLabel>
+            <p role="heading" aria-level={2} className="mt-8 font-serif text-5xl">
+              Designer,
+              <br />
+              researcher,
+              <br />
+              observer.
+            </p>
+          </div>
+          <div className="space-y-6 text-xl leading-relaxed text-stone-700 lg:col-span-7 lg:col-start-6">
+            <p>
+              I am a Product Designer and UX Researcher who enjoys understanding how people navigate complex
+              systems.
+            </p>
+            <p>
+              Over the last few years I&apos;ve worked across healthcare, service operations, enterprise platforms,
+              and digital products, translating research insights into practical product decisions.
+            </p>
+            <p>
+              Outside work I enjoy films, observing everyday services, and exploring how emerging technologies and
+              AI can support design and research workflows.
+            </p>
+            <Button asChild variant="link" className="h-auto p-0 text-emerald-800">
+              <Link to="/about">
+                More about me <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="bg-stone-950 px-6 py-24 text-white sm:px-10 lg:px-14">
+        <div className="mx-auto max-w-7xl">
+          <SectionLabel light index="10">Contact</SectionLabel>
+          <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:items-end">
+            <p role="heading" aria-level={2} className="max-w-3xl font-serif text-6xl leading-none sm:text-7xl">
+              Let&apos;s build better systems together.
+            </p>
+            <div className="border-t border-stone-700 lg:justify-self-end lg:w-full lg:max-w-md">
+              <Button
+                asChild
+                variant="ghost"
+                className="h-auto w-full justify-between rounded-none border-b border-stone-700 px-0 py-5 text-base text-stone-200 hover:bg-transparent hover:text-emerald-400"
+              >
+                <a href="mailto:shantanupate0@gmail.com">
+                  Email <ArrowRight aria-hidden />
+                </a>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="h-auto w-full justify-between rounded-none border-b border-stone-700 px-0 py-5 text-base text-stone-200 hover:bg-transparent hover:text-emerald-400"
+              >
+                <a href="https://www.linkedin.com/in/shantanu-pate" target="_blank" rel="noopener noreferrer">
+                  LinkedIn <ExternalLink aria-hidden />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="h-auto w-full justify-between rounded-none border-b border-stone-700 px-0 py-5 text-base text-stone-200 hover:bg-transparent hover:text-emerald-400"
+              >
+                <a href="mailto:shantanupate0@gmail.com?subject=Resume%20request">
+                  Resume <span className="font-mono text-xs text-stone-400">Request a copy</span>
+                </a>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
     </div>

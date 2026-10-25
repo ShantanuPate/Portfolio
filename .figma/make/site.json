@@ -1,0 +1,10 @@
+{
+  "description": "Showcase your UX research expertise with a minimal portfolio website designed for storytelling and case studies, emphasizing user insights and business impact.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

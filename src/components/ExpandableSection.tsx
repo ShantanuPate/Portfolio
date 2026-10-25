@@ -16,14 +16,15 @@ export function ExpandableSection({ title, children, defaultOpen = false }: Expa
     <div className="border border-neutral-200 rounded-2xl overflow-hidden bg-white mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-6 text-left focus:outline-none hover:bg-neutral-50 transition-colors"
+        aria-expanded={isOpen}
+        className="w-full flex items-center justify-between p-6 text-left focus-visible:outline-2 focus-visible:outline-emerald-800 hover:bg-neutral-50 transition-colors"
       >
         <h3 className="text-lg font-bold text-neutral-900">{title}</h3>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown className="w-5 h-5 text-neutral-500" />
+          <ChevronDown aria-hidden className="w-5 h-5 text-neutral-600" />
         </motion.div>
       </button>
       <AnimatePresence>

@@ -1,13 +1,29 @@
+import { Button } from "../app/components/ui/button";
+
 export function Footer() {
   return (
-    <footer className="py-12 border-t border-stone-200 bg-stone-50">
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-sm text-stone-500">
-          © {new Date().getFullYear()} Shantanu Pate. All rights reserved.
+    <footer className="border-t border-stone-800 bg-stone-950 py-10 text-stone-400">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 sm:px-10 md:flex-row md:items-center md:justify-between lg:px-14">
+        <p className="font-mono text-xs uppercase tracking-wider">
+          © {new Date().getFullYear()} Shantanu Pate · Designed with evidence
         </p>
-        <div className="flex items-center gap-6 text-sm font-medium text-stone-600">
-          <a href="https://www.linkedin.com/in/shantanu-pate" target="_blank" rel="noopener noreferrer" className="hover:text-orange-700 transition-colors">LinkedIn</a>
-          <a href="mailto:shantanupate0@gmail.com" className="hover:text-orange-700 transition-colors">Email</a>
+        <div className="flex items-center gap-5">
+          <Button
+            asChild
+            variant="link"
+            className="h-auto p-0 font-mono text-xs uppercase tracking-wider text-stone-400 hover:text-emerald-400"
+          >
+            <a href="https://www.linkedin.com/in/shantanu-pate" target="_blank" rel="noopener noreferrer">
+              LinkedIn<span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </Button>
+          <Button
+            asChild
+            variant="link"
+            className="h-auto p-0 font-mono text-xs uppercase tracking-wider text-stone-400 hover:text-emerald-400"
+          >
+            <a href="mailto:shantanupate0@gmail.com">Email</a>
+          </Button>
         </div>
       </div>
     </footer>
